@@ -390,6 +390,22 @@
   const SUPABASE_URL = 'https://jadywtwjzmbfqosxiuar.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_0T8aMyNny28voz_nbaoK4g_7B50g4O9';
   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const NOTIFICATION_EMAIL = 'rifumomabasa@gmail.com';
+
+  async function sendEmailNotification(subject, fields) {
+    const response = await fetch(`https://formsubmit.co/ajax/${NOTIFICATION_EMAIL}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({
+        _subject: subject,
+        _template: 'table',
+        _captcha: 'false',
+        ...fields
+      })
+    });
+
+    if (!response.ok) throw new Error(`Email notification failed (${response.status})`);
+  }
 
   /* ---------- Mobile menu ---------- */
   const menuBtn = document.getElementById('menuBtn');
@@ -437,6 +453,7 @@
     try {
       const { error } = await supabaseClient.from('clients').insert([payload]);
       if (error) throw error;
+      await sendEmailNotification('New free assessment request', payload);
       bookingForm.reset();
       bookingStatus.textContent = 'Thank you for making the time. I know how busy life can get. I will contact you within 24 hours.';
       bookingStatus.classList.add('text-navy', 'font-medium');
@@ -495,6 +512,7 @@
     try {
       const { error } = await supabaseClient.from('clients').insert([payload]);
       if (error) throw error;
+      await sendEmailNotification('New guide download request', payload);
       guideForm.reset();
       guideStatus.textContent = "Done! I'll send that guide across shortly.";
       guideStatus.classList.add('text-navy', 'font-medium');
